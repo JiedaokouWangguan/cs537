@@ -7,11 +7,7 @@ typedef struct
 	char c;
 }Node;
 
-typedef struct nodeList
-{
-	Node *node;
-	struct nodeList *next;
-}NList;
+void decode(FILE* file);
 
 int main(int argc, char *argv[])
 {
@@ -21,7 +17,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	for (int i = 0; i < argc; ++i)
+	for (int i = 1; i < argc; ++i)
 	{
 		FILE *file = fopen(argv[i], "rb");
 		if (NULL == file)
@@ -29,7 +25,7 @@ int main(int argc, char *argv[])
 			printf("%s\n", "my-grep: cannot open file");
 			exit(1);
 		}
-		RLE(file)
+		decode(file);
 	}
 	return 0;
 }
@@ -37,31 +33,12 @@ int main(int argc, char *argv[])
 void decode(FILE* file)
 {
 	Node node;
-	NList dummy;
-	NList *current = &dummy;
-	int count = 0;
 	while(0!= fread(&node, sizeof(Node), 1, file))
 	{
-		count += node.count;
-		Node tmp;
-		tmp.count = node.count;
-		tmp.c = node.c;
-		NList nl;
-		nl.node = &tmp;
-		current->next = &nl;
-		current = current->next;
-	}
 
-	char result[count+1];
-	NList* head = dummy.next;
-	int index = 0;
-	while(head != NULL)
-	{
-		for (int i = 0; i < head->count; ++i)
+		for (int i = 0; i < node.count; ++i)
 		{
-			result[index++] = head->c;
+			printf("%c", node.c);
 		}
 	}
-	result[count] = '\0';
-	printf("%s\n", result);
 }
