@@ -7,6 +7,8 @@ typedef struct
 	char c;
 }Node;
 
+void RLE(char* src, int len);
+
 int main(int argc, char *argv[])
 {
 	if (argc == 1)
@@ -17,11 +19,8 @@ int main(int argc, char *argv[])
 
 	char *line = NULL;
 	size_t len = 0;
-	node_line *dummy = NULL;
-	dummy = malloc(sizeof(node_line));
-	node_line *current = dummy;
 
-	for (int i = 0; i < argc; ++i)
+	for (int i = 1; i < argc; ++i)
 	{
 		FILE *file = fopen(argv[i], "r");
 		if (NULL == file)
@@ -29,8 +28,11 @@ int main(int argc, char *argv[])
 			printf("%s\n", "my-grep: cannot open file");
 			exit(1);
 		}
-		while(-1 != getline(&line, &len, file))
-			RLE(line, len)
+		int read = 0;
+		while(-1 != (read=getline(&line, &len, file)))
+		{	
+			RLE(line, read);
+		}
 	}
 
 	return 0;
@@ -38,8 +40,11 @@ int main(int argc, char *argv[])
 
 void RLE(char* src, int len)
 {
+
 	Node *nodes = (Node *)malloc(sizeof(Node)*len);
 	int nLen = 0;
+	
+	int count1 = 0;
 
 	int i = 0;
 	int j = 0;
@@ -48,17 +53,18 @@ void RLE(char* src, int len)
 		Node n;
 		n.c = src[i++];
 		nLen = 1;
+		count1++;
 
 		while(i < len && src[i] == src[i-1])
 		{
 			nLen++;
 			i++;
 		}
-		node.count = nLen;
-		nodes[j++] = node;
+		n.count = nLen;
+		nodes[j++] = n;
 	}
 
-	fwrite(nodes, sizeof(Node), len, stdout);
+	fwrite(nodes, sizeof(Node), j, stdout);
 	free(nodes);
 	nodes = NULL;
 }
