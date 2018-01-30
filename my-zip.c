@@ -1,28 +1,30 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+#define MAX_BUFFER_SIZE (1024)
 typedef struct
 {
 	int count;
 	char c;
-}Node;
+} __attribute__((packed)) Node;
 
-void RLE(char* src, int len);
 
 int main(int argc, char *argv[])
 {
 	if (argc == 1)
 	{
-		printf("%s\n", "my-zip: file1 [file2 ...]\n");
+		printf("%s\n", "my-zip: file1 [file2 ...]");
 		exit(1);
 	}
-
 	char *line = NULL;
 	size_t len = 0;
-
-	for (int i = 1; i < argc; ++i)
+	int bufferIndex = 0;
+	Node nodes[MAX_BUFFER_SIZE];
+	int nLen = 0;
+	char lastC = '\0';
+	for (int j = 1; j < argc; ++j)
 	{
-		FILE *file = fopen(argv[i], "r");
+		FILE *file = fopen(argv[j], "r");
 		if (NULL == file)
 		{
 			printf("%s\n", "my-grep: cannot open file");
@@ -31,40 +33,69 @@ int main(int argc, char *argv[])
 		int read = 0;
 		while(-1 != (read=getline(&line, &len, file)))
 		{	
-			RLE(line, read);
+
+			int i = 0;
+			while(i < read)
+			{
+				if (line[i] == lastC)
+				{
+					nLen++;
+					i++;
+				}
+				else if(lastC != '\0')
+				{
+					Node n;
+					n.count = nLen;
+					n.c = lastC;
+					nodes[bufferIndex++] = n;
+					if (bufferIndex == MAX_BUFFER_SIZE)
+					{
+						fwrite(nodes, sizeof(Node), MAX_BUFFER_SIZE, stdout);
+						bufferIndex = 0;
+					}
+					lastC = line[i];
+					nLen = 1;
+					i++;
+				}
+				else
+				{
+					lastC = line[i];
+					nLen = 1;
+					i++;	
+				}
+
+
+				while(i < read && line[i] == lastC)
+				{
+					nLen++;
+					i++;
+				}
+				if (i < read)
+				{
+					Node n;
+					n.count = nLen;
+					n.c = lastC;
+					nodes[bufferIndex++] = n;
+					if (bufferIndex == MAX_BUFFER_SIZE)
+					{
+						fwrite(nodes, sizeof(Node), MAX_BUFFER_SIZE, stdout);
+						bufferIndex = 0;
+					}
+					lastC = line[i];
+					nLen = 1;
+					i++;
+				}
+			}
 		}
 	}
-
+	if (nLen != 0)
+	{
+		Node n;
+		n.count = nLen;
+		n.c = lastC;
+		nodes[bufferIndex++] = n;
+	}
+	fwrite(nodes, sizeof(Node), bufferIndex, stdout);
 	return 0;
 }
 
-void RLE(char* src, int len)
-{
-
-	Node *nodes = (Node *)malloc(sizeof(Node)*len);
-	int nLen = 0;
-	
-	int count1 = 0;
-
-	int i = 0;
-	int j = 0;
-	while(i < len)
-	{
-		Node n;
-		n.c = src[i++];
-		nLen = 1;
-		count1++;
-
-		while(i < len && src[i] == src[i-1])
-		{
-			nLen++;
-			i++;
-		}
-		n.count = nLen;
-		nodes[j++] = n;
-	}
-
-	fwrite(nodes, sizeof(Node), j, stdout);
-	free(nodes);
-	nodes = NULL;
-}
