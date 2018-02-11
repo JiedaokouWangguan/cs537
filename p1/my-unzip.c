@@ -1,11 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-typedef struct
-{
-	int count;
-	char c;
-}Node;
 
 void decode(FILE* file);
 
@@ -13,7 +8,7 @@ int main(int argc, char *argv[])
 {
 	if (argc == 1)
 	{
-		printf("%s\n", "my-unzip: file1 [file2 ...]\n");
+		printf("%s\n", "my-unzip: file1 [file2 ...]");
 		exit(1);
 	}
 
@@ -32,13 +27,15 @@ int main(int argc, char *argv[])
 
 void decode(FILE* file)
 {
-	Node node;
-	while(0!= fread(&node, sizeof(Node), 1, file))
+	int count;
+	while(0!= fread(&count, sizeof(int), 1, file))
 	{
+		char c; 
+		fread(&c, sizeof(char), 1, file);
 
-		for (int i = 0; i < node.count; ++i)
+		for (int i = 0; i < count; ++i)
 		{
-			printf("%c", node.c);
+			printf("%c", c);
 		}
 	}
 }
