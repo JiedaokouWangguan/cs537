@@ -10,35 +10,12 @@ char *wishPath[128];
 
 int newProcess(char *segment)
 {
-	int tmp11 = 0;
-	while(wishPath[tmp11] != NULL)
-	{
-		printf("wishPath11111111%s\n", wishPath[tmp11++]);
-	}
-
-	printf("strlen%lu\n", strlen(segment)+1);
-
 	int len = (int)strlen(segment)+1;
 
 	char segmentArray[len];
 
-	printf("wishPath111111112%s\n", wishPath[0]);
-	printf("wishPath111111113%s\n", wishPath[0]);
-	printf("wishPath111111114%s\n", wishPath[0]);
-
-	int tmp111 = 0;
-	while(wishPath[tmp111] != NULL)
-	{
-		printf("wishPath2222222%s\n", wishPath[tmp111++]);
-	}
-
 	strcpy(segmentArray, segment);
 
-	int tmp1111 = 0;
-	while(wishPath[tmp1111] != NULL)
-	{
-		printf("wishPath333333%s\n", wishPath[tmp1111++]);
-	}
 
 	char *delim = ">";
 	char *cmd = strtok(segmentArray, delim);
@@ -52,14 +29,6 @@ int newProcess(char *segment)
 	myRedirection[redIndex] = NULL;
 	// set output stream
 
-
-	//bad
-
-	int tmp22 = 0;
-	while(wishPath[tmp22] != NULL)
-	{
-		printf("wishPath4444%s\n", wishPath[tmp22++]);
-	}
 	// execute cmd
 	int cmdIndex = 0;
 	char *myArgv[128];
@@ -70,12 +39,6 @@ int newProcess(char *segment)
 	while(NULL != (myArgv[cmdIndex++] = strtok(NULL, delim)));
 	myArgv[cmdIndex] = NULL;
 
-
-	int tmp4 = 0;
-	while(wishPath[tmp4] != NULL)
-	{
-		printf("wishPathBeforeIf%s\n", wishPath[tmp4++]);
-	}
 
 	if (0 == strcmp(myArgv[0], "exit"))
 	{
@@ -90,40 +53,18 @@ int newProcess(char *segment)
 	}
 	else if (0 == strcmp(myArgv[0], "path"))
 	{
-		int tmp1 = 0;
-		while(wishPath[tmp1] != NULL)
-		{
-			printf("wishPathBefore%s\n", wishPath[tmp1++]);
-		}
-
 		int pathIndex = 0;
 		int myIndex = 1;
 		while(myArgv[myIndex] !=  NULL)
 		{
-			wishPath[pathIndex++] = myArgv[myIndex++];
+			strcpy(wishPath[pathIndex++], myArgv[myIndex++]);
 		}
-
-		tmp1 = 0;
-		while(wishPath[tmp1] != NULL)
-		{
-			printf("wishPathAfter%s\n", wishPath[tmp1++]);
-		}
-
+		wishPath[pathIndex] = NULL;
 	}
 	else
 	{
-		int tmp2 = 0;
-		while(wishPath[tmp2] != NULL)
-		{
-			printf("wishPathBeforeFork%s\n", wishPath[tmp2++]);
-		}
 		if (fork() == 0)
 		{
-			int tmp1 = 0;
-			while(wishPath[tmp1] != NULL)
-			{
-				printf("wishPathInChild%s\n", wishPath[tmp1++]);
-			}
 
 			int myIndex = 0;
 			while(myRedirection[myIndex] != NULL)
@@ -135,13 +76,10 @@ int newProcess(char *segment)
 			myIndex = 0;
 			while(wishPath[myIndex] != NULL)
 			{
-				printf("wishPath%s\n", wishPath[myIndex]);
 				char myAbsCmd[128];
 				strcat(myAbsCmd, wishPath[myIndex]);
 				strcat(myAbsCmd, "/");
 				strcat(myAbsCmd, myArgv[0]);
-
-				printf("myAbsCmd%s\n", myAbsCmd);
 				if(0 == access(myAbsCmd, X_OK))
 				{
 					execv(myAbsCmd, myArgv);
@@ -160,9 +98,8 @@ int main(int argc, char *argv[])
 	char error_message[30] = "An error has occurred\n";
 	int readFromFile = 0;// get input from stdin
 	FILE *input = stdin;
-	wishPath[0] = "/bin";
+	strcpy(wishPath[0], "/bin");
 	wishPath[1] = NULL;
-
 	if(argc == 2)
 		readFromFile = 1;// get input from file
 	else if(argc > 2){
